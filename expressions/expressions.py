@@ -26,7 +26,7 @@ class Expression:  #  Base Class
         
         return NotImplemented
     
-    def __mul(self, other):
+    def __mul__(self, other):
         if isinstance(other, numbers.Number):
             other = Number(other)
         return Mul(self, other) 
@@ -110,7 +110,7 @@ class Pow(Operator):
 
 
 class Terminal(Expression):    #  Nodes with no children
-    
+    precedence = 3
     def __init__(self, value):
         self.value = value
 
@@ -124,11 +124,17 @@ class Terminal(Expression):    #  Nodes with no children
 
 
 class Symbol(Terminal):
-    def __init__
+    def __init__(self, value):
+        if not isinstance(value, str):
+            raise TypeError("Symbol value must be a string.")
+
+        super().__init__(value)
 
 class Number(Terminal):
+    def __init__(self, value):
+        if not isinstance(value, numbers.Number):
+            raise TypeError("Number value must be a number.")
 
+        super().__init__(value)
 
-
-
-
+def postvisitor()
