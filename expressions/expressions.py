@@ -1,7 +1,13 @@
+"""."""
+
 import numbers
 from functools import singledispatch
 
-class Expression:  #  Base Class
+
+class Expression:
+    #  Base Class
+    """."""
+
     def __init__(self, *operands):
         self.operands = operands
 
@@ -30,7 +36,7 @@ class Expression:  #  Base Class
     def __mul__(self, other):
         if isinstance(other, numbers.Number):
             other = Number(other)
-        return Mul(self, other) 
+        return Mul(self, other)
 
     def __rmul__(self, other):
         if isinstance(other, numbers.Number):
@@ -47,7 +53,7 @@ class Expression:  #  Base Class
         if isinstance(other, numbers.Number):
             return Div(Number(other), self)
 
-        return NotImplemented    
+        return NotImplemented
 
     def __pow__(self, other):
         if isinstance(other, numbers.Number):
@@ -64,6 +70,7 @@ class Expression:  #  Base Class
 
 
 class Operator(Expression):   # Nodes with 2 children (binary operator)
+    """."""
 
     def __repr__(self):
         return type(self).__name__ + repr(self.operands)
@@ -82,35 +89,46 @@ class Operator(Expression):   # Nodes with 2 children (binary operator)
 
 
 class Add(Operator):
+    """."""
+
     precedence = 0
     symbol = "+"
 
 
 class Sub(Operator):
+    """."""
+
     precedence = 0
     symbol = "-"
 
 
 class Mul(Operator):
+    """."""
+
     precedence = 1
     symbol = "*"
 
 
 class Div(Operator):
+    """."""
+
     precedence = 1
     symbol = "/"
 
 
 class Pow(Operator):
+    """."""
+
     precedence = 2
     symbol = "^"
 
 
+class Terminal(Expression):
+    #  Nodes with no children
+    """."""
 
-
-
-class Terminal(Expression):  #  Nodes with no children
     precedence = 3
+
     def __init__(self, value):
         self.value = value
 
@@ -118,21 +136,27 @@ class Terminal(Expression):  #  Nodes with no children
 
     def __repr__(self):
         return repr(self.value)
-    
+
     def __str__(self):
         return str(self.value)
 
 
 class Symbol(Terminal):
+    """."""
+
     def __init__(self, value):
         if not isinstance(value, str):
             raise TypeError("Symbol value must be a string.")
 
-        super().__init__(value)  # Calls parent class constructor w arg "value". 
-                                 # Passes that value up the chain so Terminal can do: self.value = value
-                                 # super().__init__() which then calls Expression with no operands
+        super().__init__(value)  # Calls parent class constructor w
+# arg "value".
+# Passes that value up the chain so Terminal can do: self.value = value
+# super().__init__() which then calls Expression with no operands
+
 
 class Number(Terminal):
+    """."""
+
     def __init__(self, value):
         if not isinstance(value, numbers.Number):
             raise TypeError("Number value must be a number.")
@@ -141,8 +165,10 @@ class Number(Terminal):
 
 
 def postvisitor(expr, fn, **kwargs):
+    """."""
     stack = []
-    visited = {}  # memoization dictionary: stores the result of fn(e, ...) for each expression node e
+    visited = {}  # memoization dictionary: stores the result of fn(e, ...)
+    # for each expression node e
     stack.append(expr)
     while stack:
         e = stack.pop()
@@ -160,35 +186,46 @@ def postvisitor(expr, fn, **kwargs):
 
     return visited[expr]
 
+
 @singledispatch
 def differentiate(expr, *o, **kwargs):  # Default behaviour.
+    """."""
     raise NotImplementedError(
         f"Cannot differentiate a {type(expr).__name__}"
     )
+
 
 @differentiate.register(Number)  # Constant differentiation --> 0
 def _(expr, *o, **kwargs):
     return 0.0
 
+
 @differentiate.register(Symbol)  # Symbol differentiation
 def _(expr, *o, **kwargs):
-    return 1 if kwargs["var"] == expr.value else 0.0  # Is this the symbol we are differentiating wrt yes-->1, no-->0
+    return 1 if kwargs["var"] == expr.value else 0.0  # Is this the symbol we
+# are differentiating wrt yes-->1, no-->0
+
 
 @differentiate.register(Add)
 def _(expr, *o, **kwargs):
     return o[0] + o[1]
 
+
 @differentiate.register(Sub)
 def _(expr, *o, **kwargs):
     return o[0] - o[1]
+
 
 @differentiate.register(Mul)
 def _(expr, *o, **kwargs):
     return o[0]*expr.operands[1] + expr.operands[0]*o[1]
 
+
 @differentiate.register(Div)
 def _(expr, *o, **kwargs):
-    return (o[0]*expr.operands[1] - expr.operands[0]*o[1])/(expr.operands[1])**2
+    return (o[0]*expr.operands[1] - expr.operands[0]*o[1])\
+            / (expr.operands[1])**2
+
 
 @differentiate.register(Pow)
 def _(expr, *o, **kwargs):
