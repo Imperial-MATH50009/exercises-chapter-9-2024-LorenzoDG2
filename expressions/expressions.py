@@ -108,12 +108,12 @@ class Pow(Operator):
 
 
 
-class Terminal(Expression):    #  Nodes with no children
+class Terminal(Expression):  #  Nodes with no children
     precedence = 3
     def __init__(self, value):
         self.value = value
 
-        super().__init__()
+        super().__init__()  # Calls parent class constructor.
 
     def __repr__(self):
         return repr(self.value)
@@ -127,7 +127,9 @@ class Symbol(Terminal):
         if not isinstance(value, str):
             raise TypeError("Symbol value must be a string.")
 
-        super().__init__(value)
+        super().__init__(value)  # Calls parent class constructor w arg "value". 
+                                 # Passes that value up the chain so Terminal can do: self.value = value
+                                 # super().__init__() which then calls Expression with no operands
 
 class Number(Terminal):
     def __init__(self, value):
@@ -136,5 +138,23 @@ class Number(Terminal):
 
         super().__init__(value)
 
-def postvisitor():
-    pass
+
+def postvisitor(expr, fn, **kwargs):
+    stack = []
+    visited = {}  # memoization dictionary: stores the result of fn(e, ...) for each expression node e
+    stack.append(expr)
+    while stack:
+        e = stack.pop()
+        unvisited_children = []
+        for o in e.operands:
+            if o not in visited:
+                unvisited_children.append(o)
+
+        if unvisited_children:
+            stack.append(e)
+            for uc in unvisited_children:
+                stack.append(uc)
+        else:
+            visited[e] = fn(e, *(visited[o] for o in e.operands), **kwargs)
+
+    return visited[expr]
