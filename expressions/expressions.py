@@ -1,4 +1,5 @@
 import numbers
+from functools import singledispatch
 
 class Expression:  #  Base Class
     def __init__(self, *operands):
@@ -158,3 +159,37 @@ def postvisitor(expr, fn, **kwargs):
             visited[e] = fn(e, *(visited[o] for o in e.operands), **kwargs)
 
     return visited[expr]
+
+@singledispatch
+def differentiate(expr, *o, **kwargs):  # Default behaviour.
+    raise NotImplementedError(
+        f"Cannot differentiate a {type(expr).__name__}"
+    )
+
+@differentiate.register(Number)  # Constant differentiation --> 0
+def _(expr, *o, **kwargs):
+    return 0.0
+
+@differentiate.register(Symbol)  # Symbol differentiation
+def _(expr, *o, **kwargs):
+    return 1 if kwargs["var"] == expr.value else 0.0  # Is this the symbol we are differentiating wrt yes-->1, no-->0
+
+@differentiate.register(Add)
+def _(expr, *o, **kwargs):
+    return o[0] + o[1]
+
+@differentiate.register(Sub)
+def _(expr, *o, **kwargs):
+    return o[0] - o[1]
+
+@differentiate.register(Mul)
+def _(expr, *o, **kwargs):
+    return o[0]*expr.operands[1] + expr.operands[0]*o[1]
+
+@differentiate.register(Div)
+def _(expr, *o, **kwargs):
+    return (o[0]*expr.operands[1] - expr.operands[0]*o[1])/(expr.operands[1])**2
+
+@differentiate.register(Pow)
+def _(expr, *o, **kwargs):
+    return expr.operands[1]*(expr.operands[0]**(expr.operands[1]-1))*o[0]
