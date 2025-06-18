@@ -5,38 +5,38 @@ class Expression:  #  Base Class
         self.operands = operands
 
     def __add__(self, other):
-        if isinstance(other, numbers.Number):
-            other = Number(other)
-        return Add(self, other)
-    
+        if isinstance(other, numbers.Number):  # Number in numbers
+            other = Number(other)  # custom Number class I made
+        return Add(self, other)  # first try
+
     def __radd__(self, other):
         if isinstance(other, numbers.Number):
             return Add(Number(other), self)
-        
-        return NotImplemented
-    
+
+        return NotImplemented  # second chance- if this doesnt work- give up
+
     def __sub__(self, other):
         if isinstance(other, numbers.Number):
             other = Number(other)
         return Sub(self, other)
-    
+
     def __rsub__(self, other):
         if isinstance(other, numbers.Number):
             return Sub(Number(other), self)
-        
+
         return NotImplemented
-    
+
     def __mul__(self, other):
         if isinstance(other, numbers.Number):
             other = Number(other)
         return Mul(self, other) 
-        
+
     def __rmul__(self, other):
         if isinstance(other, numbers.Number):
             return Mul(Number(other), self)
-        
+
         return NotImplemented
-    
+
     def __truediv__(self, other):
         if isinstance(other, numbers.Number):
             other = Number(other)
@@ -45,11 +45,10 @@ class Expression:  #  Base Class
     def __rtruediv__(self, other):
         if isinstance(other, numbers.Number):
             return Div(Number(other), self)
-        
+
         return NotImplemented    
 
     def __pow__(self, other):
-
         if isinstance(other, numbers.Number):
             other = Number(other)
 
@@ -67,7 +66,7 @@ class Operator(Expression):   # Nodes with 2 children (binary operator)
 
     def __repr__(self):
         return type(self).__name__ + repr(self.operands)
-    
+
     def __str__(self):
 
         def paren(expr):
@@ -137,4 +136,5 @@ class Number(Terminal):
 
         super().__init__(value)
 
-def postvisitor()
+def postvisitor():
+    pass
