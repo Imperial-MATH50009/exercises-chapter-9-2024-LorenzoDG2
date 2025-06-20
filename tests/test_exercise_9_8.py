@@ -1,3 +1,15 @@
+import sys
+import os
+
+# Append the path to the directory containing `example_code`
+sys.path.append(
+    os.path.abspath(
+        os.path.join(os.path.dirname(__file__), '..', '..', 'object_oriented_programming')
+    )
+)
+
+from example_code.expression_tools import postvisitor, evaluate
+
 import pytest
 from functools import singledispatch
 from collections.abc import Sequence
